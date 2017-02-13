@@ -3,7 +3,8 @@ import os
 from PIL import Image
 
 # GET RELATIVE URLS FROM FILE AND MAKE URLS
-with open('dataAdded.txt') as f:
+# with open('dataAdded.txt') as f:
+with open('cd3.jpg') as f:
     relativePaths = f.read().splitlines()
 
 print "\nrelativePaths List"
@@ -18,7 +19,16 @@ print "\nrelativePaths length"
 print "===================="
 print len(relativePaths)
 
+size = (320, 240)
+
+
+# //loop here
+outfile= 'thumb_'+'cd3.jpg'
 im = Image.open('cd3.jpg')
+
+im.thumbnail(size)
+im.save(outfile, "JPEG")
+
 
 print im.format, im.size, im.mode
 # tempRelativePath = relativePaths[index]
