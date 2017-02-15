@@ -3,7 +3,7 @@ import requests
 import exifread
 
 # GET RELATIVE URLS FROM FILE AND MAKE ABSOLUTE PATHS
-with open('exifCurrentlyBeingAdded.txt') as f: #change to dataAdded.txt
+with open('dataAdded.txt') as f: #change to dataAdded.txt
     relativePaths = f.read().splitlines()
 
 # print "\nrelativePaths List"
