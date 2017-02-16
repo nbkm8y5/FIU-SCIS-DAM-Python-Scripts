@@ -1,9 +1,46 @@
 # -*- coding: UTF-8 -*-
 import requests
 import exifread
+import struct
+import imghdr
+
+def get_image_size(fname):
+    '''Determine the image type of fhandle and return its size.
+    from draco'''
+    with open(fname, 'rb') as fhandle:
+        head = fhandle.read(24)
+        if len(head) != 24:
+            return
+        if imghdr.what(fname) == 'png':
+            check = struct.unpack('>i', head[4:8])[0]
+            if check != 0x0d0a1a0a:
+                return
+            width, height = struct.unpack('>ii', head[16:24])
+        elif imghdr.what(fname) == 'gif':
+            width, height = struct.unpack('<HH', head[6:10])
+        elif imghdr.what(fname) == 'jpeg':
+            try:
+                fhandle.seek(0) # Read 0xff next
+                size = 2
+                ftype = 0
+                while not 0xc0 <= ftype <= 0xcf:
+                    fhandle.seek(size, 1)
+                    byte = fhandle.read(1)
+                    while ord(byte) == 0xff:
+                        byte = fhandle.read(1)
+                    ftype = ord(byte)
+                    size = struct.unpack('>H', fhandle.read(2))[0] - 2
+                # We are at a SOFn block
+                fhandle.seek(1, 1)  # Skip `precision' byte.
+                height, width = struct.unpack('>HH', fhandle.read(4))
+            except Exception: #IGNORE:W0703
+                return
+        else:
+            return
+        return width, height
 
 # GET RELATIVE URLS FROM FILE AND MAKE ABSOLUTE PATHS
-with open('exifCurrentlyBeingAdded.txt') as f: #change to dataAdded.txt
+with open('data.txt') as f: #change to dataAdded.txt
     relativePaths = f.read().splitlines()
 
 # print "\nrelativePaths List"
@@ -12,28 +49,12 @@ with open('exifCurrentlyBeingAdded.txt') as f: #change to dataAdded.txt
 
 # print "\nrelativePaths type"
 # print "=================="
-#list
+# list
 # print type(relativePaths) 
 
 # print "\nrelativePaths length"
 # print "===================="
 # print len(relativePaths)
-
-absolutePathPrefix = '/disk/'
-absolutePaths = [absolutePathPrefix + x for x in relativePaths]
-
-# print "\nabsolutePaths List"
-# print "=================="
-# print(absolutePaths)
-
-# print "\nabsolutePaths type"
-# print "=================="
-#list
-# print type(absolutePaths)
-
-# print "\nabsolutePaths length"
-# print "===================="
-# print len(absolutePaths)
 
  # GET ALL IMAGES FROM DATABASE AND GET ID
 
@@ -57,72 +78,131 @@ allImages = requests.request("GET", get_url, headers=headers)
 #     print y['_id'].encode('ascii', 'ignore')
 #     print type(y['_id'].encode('ascii', 'ignore')) #string
     
-# LOOP THROUGH ABSOLUTE PATHS
-for index, x in enumerate(absolutePaths):
+# LOOP THROUGH RELATIVE PATHS
+
+countWithExif = 0
+countWithOutExif = 0
+countWithOutImageTuple = 0
+
+for index, relativePath in enumerate(relativePaths):
     # print allImages.json()['response'][index]['url'].encode('ascii', 'ignore')
     # print type(allImages.json()['response'][index]['url'].encode('ascii', 'ignore'))
     # print allImages.json()['response'][index]['_id'].encode('ascii', 'ignore')
     # print type(allImages.json()['response'][index]['_id'].encode('ascii', 'ignore'))
     
-    print "\nabsolutePath"
+    print "\nrelativePath"
     print "==="
-    print x
+    print relativePath
 
     print "\nindex"
     print "====="
     print index
 
-    # print "\nindex type"
-    # print "=========="
-    #int
-    # print type(index) 
-    # print "\n"
-
     # GET EXIF DATA
     # Open image file for reading (binary mode)
-    f = open(x, 'rb')
+    f = open(relativePath, 'rb')
     # Return Exif tags
     tags = exifread.process_file(f)
-    # print tags
-    # print tags["Image Make"]
-    # print tags["Image Model"]
-    # print tags["EXIF ExifImageWidth"]
-    # print tags["EXIF ExifImageLength"]
-    # print tags["EXIF DateTimeOriginal"]
-    # print tags["EXIF FileSource"]
-    # print tags["EXIF ExposureMode"]
-    # print tags["EXIF ExposureTime"]
-    # print tags["EXIF MaxApertureValue"]
-    # print tags["EXIF ISOSpeedRatings"]
-    # print tags["EXIF ExposureBiasValue"]
-    # print tags["EXIF Flash"]
-    # print tags["Image Orientation"]
+    
+    if "EXIF ExifImageWidth" in tags:
+        countWithExif += 1
+        if "Image Orientation" in tags:
+            
+            if "Image Make" in tags:
+                
+                print tags["Image Make"]
+                print tags["Image Model"]
+                print tags["EXIF ExifImageWidth"]
+                print tags["EXIF ExifImageLength"]
+                print tags["EXIF DateTimeOriginal"]
+                print tags["Image Orientation"]
 
-    print "\n"
-    #dict
-    # print type(tags)
-    #string
-    # print type(tags["Image Make"].__class__.__name__)
-    # print tags.get("Image Make")
-    # print str(tags["Image Make"])
-    # UPDATE EXIF DATA USING ID
+                #dict
+                # print type(tags)
+                #string
+                # print type(tags["Image Make"].__class__.__name__)
+                # print tags.get("Image Make")
+                # print str(tags["Image Make"])
+                # UPDATE EXIF DATA USING ID
 
-    # url = "http://localhost:3000/api/v1/digitalassets/" + allImages.json()['response'][index]['_id'].encode('ascii', 'ignore')
-    url = "http://assets.cs.fiu.edu:3000/api/v1/digitalassets/" + allImages.json()['response'][index]['_id'].encode('ascii', 'ignore')#use in access.cs.fiu.edu
-    # print url
+                put_url = "http://assets.cs.fiu.edu:3000/api/v1/digitalassets/" + allImages.json()['response'][index]['_id'].encode('ascii', 'ignore')
+                print "\nurl"
+                print "====="
+                print put_url
 
-    # if str(tags["EXIF FileSource"]) is None:
-    payload = "{\"exif\": {\"make\": \"" + str(tags["Image Make"]) + "\",\"model\": \"" + str(tags["Image Model"]) + "\",\"width\": " + str(tags["EXIF ExifImageWidth"]) + ",\"length\": " + str(tags["EXIF ExifImageLength"]) + ",\"created\": \"" + str(tags["EXIF DateTimeOriginal"]) + "\"}}" 
-    # payload = "{\"exif\": {\"make\": \"" + str(tags["Image Make"]) + "\",\"model\": \"" + str(tags["Image Model"]) + ",\"created\": \"" + str(tags["EXIF DateTimeOriginal"]) + "\"}}"
-    # else:
-    #      payload = "{\"exif\": {\"make\": \"" + str(tags["Image Make"]) + "\",\"model\": \"" + str(tags["Image Model"]) + "\",\"width\": " + str(tags["EXIF ExifImageWidth"]) + ",\"length\": " + str(tags["EXIF ExifImageLength"]) + ",\"created\": \"" + str(tags["EXIF DateTimeOriginal"]) + "\",\"fileSource\": \"" + str(tags["EXIF FileSource"]) + "\",\"exposureMode\":\"" + str(tags["EXIF ExposureMode"]) + "\",\"exposureTime\": \"" + str(tags["EXIF ExposureTime"]) + "\",\"aperture\": \"" + str(tags["EXIF MaxApertureValue"]) + "\", \"iso\": \"" + str(tags["EXIF ISOSpeedRatings"]) + "\",\"flash\": \"" + str(tags["EXIF Flash"]) + "\",\"orientation\": \"" + str(tags["Image Orientation"]) + "\"}}"
+                put_urlpayload = "{\"exif\": {\"make\": \"" + str(tags["Image Make"]) + "\",\"model\": \"" + str(tags["Image Model"]) + "\",\"width\": " + str(tags["EXIF ExifImageWidth"]) + ",\"length\": " + str(tags["EXIF ExifImageLength"]) + ",\"created\": \"" + str(tags["EXIF DateTimeOriginal"]) + "\",\"orientation\": \"" + str(tags["Image Orientation"]) + "\"}}"
 
-    headers = {
-        'content-type': "application/json",
-        'cache-control': "no-cache",
-        'postman-token': "fde7de20-b559-351c-0521-354ec6436131"
-        }
+                print "\npayload"
+                print "====="
+                print put_urlpayload
 
-    response = requests.request("PUT", url, data=payload, headers=headers)
+                headers_two = {
+                    'content-type': "application/json",
+                    'cache-control': "no-cache",
+                    'postman-token': "fde7de20-b559-351c-0521-354ec6436131"
+                    }
 
-    # print(response.text)
+                response = requests.request("PUT", put_url, data=put_urlpayload, headers=headers_two)
+
+                print(response.text)
+    else:
+        countWithOutExif += 1
+        print"\nImages Width and Length"
+        imageTuple = get_image_size(relativePath)
+
+        if imageTuple is not None:
+            
+            print imageTuple
+            print imageTuple[0]
+            print imageTuple[1]
+
+            put_url_no_exif = "http://assets.cs.fiu.edu:3000/api/v1/digitalassets/" + allImages.json()['response'][index]['_id'].encode('ascii', 'ignore')
+
+            print "\nurl"
+            print "====="
+            print put_url_no_exif
+
+            put_url_no_exif_payload = "{\"exif\": {\"width\": " + str(imageTuple[0]) + ",\"length\": " + str(imageTuple[1]) + "\"}}"
+
+            print "\npayload"
+            print "====="
+            print put_url_no_exif_payload
+
+            headers_three = {
+                        'content-type': "application/json",
+                        'cache-control': "no-cache",
+                        'postman-token': "fde7de20-b559-351c-0521-354ec6436131"
+                        }
+
+            responseTwo = requests.request("PUT", put_url_no_exif, data=put_url_no_exif_payload, headers=headers_three)
+
+            print(responseTwo.text)
+        else:
+            countWithOutImageTuple +=1
+
+            put_url_no_image_tuple = "http://assets.cs.fiu.edu:3000/api/v1/digitalassets/" + allImages.json()['response'][index]['_id'].encode('ascii', 'ignore')
+
+            print "\nurl"
+            print "====="
+            print put_url_no_image_tuple
+
+            put_url_no_image_tuple_payload = "{\"exif\": {\"width\": " + str(320) + ",\"length\": " + str(240) + "\"}}"
+
+            print "\npayload"
+            print "====="
+            print put_url_no_image_tuple_payload
+
+            headers_four = {
+                        'content-type': "application/json",
+                        'cache-control': "no-cache",
+                        'postman-token': "fde7de20-b559-351c-0521-354ec6436131"
+                        }
+
+            responseThree = requests.request("PUT", put_url_no_image_tuple, data=put_url_no_image_tuple_payload, headers=headers_four)
+
+            print(responsethree.text)
+
+    print "\nCount with Exif Width and Length: ", countWithExif
+    print "\nCount without Exif: ", countWithOutExif
+    print "\nCount without Image Tuple: ", countWithOutImageTuple
+    print "\nTotal: ", countWithOutExif + countWithExif

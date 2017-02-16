@@ -1,3 +1,5 @@
+// FIX THE ERROR OF THUMBNAILS BEING SAVED WITH DIFFERENT FILE NAMES
+
 import * as Jimp from 'jimp';
 import * as fs from 'fs';
 import * as path from 'path';
