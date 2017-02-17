@@ -58,7 +58,7 @@ with open('data.txt') as f: #change to dataAdded.txt
 
  # GET ALL IMAGES FROM DATABASE AND GET ID
 
-get_url = "http://assets.cs.fiu.edu:3000/api/v1/digitalassets"
+get_url = "http://localhost:3000/api/v1/digitalassets"
 
 headers = {
 'cache-control': "no-cache",
@@ -125,7 +125,7 @@ for index, relativePath in enumerate(relativePaths):
                 # print str(tags["Image Make"])
                 # UPDATE EXIF DATA USING ID
 
-                put_url = "http://assets.cs.fiu.edu:3000/api/v1/digitalassets/" + allImages.json()['response'][index]['_id'].encode('ascii', 'ignore')
+                put_url = "http://localhost:3000/api/v1/digitalassets/" + allImages.json()['response'][index]['_id'].encode('ascii', 'ignore')
                 print "\nurl"
                 print "====="
                 print put_url
@@ -156,7 +156,7 @@ for index, relativePath in enumerate(relativePaths):
             print imageTuple[0]
             print imageTuple[1]
 
-            put_url_no_exif = "http://assets.cs.fiu.edu:3000/api/v1/digitalassets/" + allImages.json()['response'][index]['_id'].encode('ascii', 'ignore')
+            put_url_no_exif = "http://localhost:3000/api/v1/digitalassets/" + allImages.json()['response'][index]['_id'].encode('ascii', 'ignore')
 
             print "\nurl"
             print "====="
@@ -180,13 +180,13 @@ for index, relativePath in enumerate(relativePaths):
         else:
             countWithOutImageTuple +=1
 
-            put_url_no_image_tuple = "http://assets.cs.fiu.edu:3000/api/v1/digitalassets/" + allImages.json()['response'][index]['_id'].encode('ascii', 'ignore')
+            put_url_no_image_tuple = "http://localhost:3000/api/v1/digitalassets/" + allImages.json()['response'][index]['_id'].encode('ascii', 'ignore')
 
             print "\nurl"
             print "====="
             print put_url_no_image_tuple
 
-            put_url_no_image_tuple_payload = "{\"exif\": {\"width\": " + str(320) + ",\"length\": " + str(240) + "\"}}"
+            put_url_no_image_tuple_payload = "{\"exif\": {\"width\": " + str(3200) + ",\"length\": " + str(2400) + "\"}}"
 
             print "\npayload"
             print "====="
