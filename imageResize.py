@@ -36,7 +36,7 @@ print im.format, im.size, im.mode
 
 
 
-    # fiuUrl = "http://assets.cs.fiu.edu:3000/api/v1/digitalassets"
+    # fiuUrl = "http://localhost:3000/api/v1/digitalassets"
 
     # modelPayload = {
     #         'fileName': tempFileName,

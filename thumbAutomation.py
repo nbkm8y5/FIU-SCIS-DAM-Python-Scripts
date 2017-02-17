@@ -3,7 +3,7 @@
 import requests
 import os
 
-get_url = "http://assets.cs.fiu.edu:3000/api/v1/digitalassets"
+get_url = "http://localhost:3000/api/v1/digitalassets"
 
 headers = {
 'cache-control': "no-cache",
@@ -23,8 +23,7 @@ for index, y in  enumerate(allImages.json()['response']):
     print y['_id'].encode('ascii', 'ignore')
     print type(y['_id'].encode('ascii', 'ignore')) #string
 
-    url = "http://assets.cs.fiu.edu:3000/api/v1/digitalassets/" + allImages.json()['response'][index]['_id'].encode('ascii', 'ignore')
-    # # url = "http://assets.cs.fiu.edu:3000/api/v1/digitalassets/" + allImages.json()['response'][index]['_id'].encode('ascii', 'ignore')#use in access.cs.fiu.edu
+    url = "http://localhost:3000/api/v1/digitalassets/" + allImages.json()['response'][index]['_id'].encode('ascii', 'ignore')
     print os.path.basename(y['url'].encode('ascii', 'ignore'))
     payload = "{\"thumbnailUrl\": \"http://assets.cs.fiu.edu:3000/assets/thumbnails/thumbnail-" + os.path.basename(y['url'].encode('ascii', 'ignore')) + "\"}"
     headers = {
