@@ -65,7 +65,11 @@ headers = {
 'postman-token': "2d5ecaf6-fa57-fb91-de5b-53840ef16c41"
 }
 
-allImages = requests.request("GET", get_url, headers=headers)
+try:
+    allImages = requests.request("GET", get_url, headers=headers)
+except ConnectionError as e:    # This is the correct syntax
+   print e
+   allImages = "No response from API GET /digitalassets"
 
 # for index, y in  enumerate(allImages.json()['response']):
 #     print index
@@ -83,6 +87,7 @@ allImages = requests.request("GET", get_url, headers=headers)
 countWithExif = 0
 countWithOutExif = 0
 countWithOutImageTuple = 0
+unsuccessfulUpdate = [];
 
 for index, relativePath in enumerate(relativePaths):
     # print allImages.json()['response'][index]['url'].encode('ascii', 'ignore')
@@ -142,9 +147,13 @@ for index, relativePath in enumerate(relativePaths):
                     'postman-token': "fde7de20-b559-351c-0521-354ec6436131"
                     }
 
-                response = requests.request("PUT", put_url, data=put_urlpayload, headers=headers_two)
-
-                print(response.text)
+                try:
+                    response = requests.request("PUT", put_url, data=put_urlpayload, headers=headers_two)
+                    print(response.text)
+                except ConnectionError as e:
+                    unsuccessfulUpdate.append(relativePath)
+                    print e
+                    response = "No response from API PUT /digitalassets/:id"
     else:
         countWithOutExif += 1
         print"\nImages Width and Length"
@@ -174,9 +183,13 @@ for index, relativePath in enumerate(relativePaths):
                         'postman-token': "fde7de20-b559-351c-0521-354ec6436131"
                         }
 
-            responseTwo = requests.request("PUT", put_url_no_exif, data=put_url_no_exif_payload, headers=headers_three)
-
-            print(responseTwo.text)
+            try:
+                responseTwo = requests.request("PUT", put_url_no_exif, data=put_url_no_exif_payload, headers=headers_three)
+                print(responseTwo.text)
+            except ConnectionError as e:
+                unsuccessfulUpdate.append(relativePath)
+                print e
+                response = "No response from API PUT /digitalassets/:id"
         else:
             countWithOutImageTuple +=1
 
@@ -198,11 +211,18 @@ for index, relativePath in enumerate(relativePaths):
                         'postman-token': "fde7de20-b559-351c-0521-354ec6436131"
                         }
 
-            responseThree = requests.request("PUT", put_url_no_image_tuple, data=put_url_no_image_tuple_payload, headers=headers_four)
-
-            print(responsethree.text)
+            try:
+                responseThree = requests.request("PUT", put_url_no_image_tuple, data=put_url_no_image_tuple_payload, headers=headers_four)
+                print(responsethree.text)
+            except ConnectionError as e:
+                unsuccessfulUpdate.append(relativePath)
+                print e
+                response = "No response from API PUT /digitalassets/:id"
 
     print "\nCount with Exif Width and Length: ", countWithExif
     print "\nCount without Exif: ", countWithOutExif
     print "\nCount without Image Tuple: ", countWithOutImageTuple
     print "\nTotal: ", countWithOutExif + countWithExif
+
+for item in unsuccessfulUpdate:
+    print item

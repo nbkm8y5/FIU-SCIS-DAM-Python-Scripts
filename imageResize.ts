@@ -7,7 +7,7 @@ console.log("Image Thumbnail Program");
 
 function willGetRelativePathsFromFile(): Promise<string> {
     return new Promise((resolve, reject) => {
-        fs.readFile('./imageThumbCurrentlyBeingAdded.txt', 'utf8', (err, dataString) => {
+        fs.readFile('./data.txt', 'utf8', (err, dataString) => {
             if (err) reject(err);
             else resolve(dataString);
         });
@@ -27,20 +27,20 @@ export async function getRelativePathArray(): Promise<string[]> {
     return dataStringArray;
 };
 
-getRelativePathArray().then(array => {
-    array.forEach((item, index) => {
-        console.log(item);
-        console.log(path.basename(item));
+getRelativePathArray()
+    .then(array => {
+        array.forEach((item, index) => {
+            console.log(item);
 
-        Jimp.read("/disk/" + item).then(lenna => {
-            lenna.quality(50)
-                .scale(0.1)
-                .write("/disk/assets/thumbnails/thumbnail-" + path.basename(item)); // save
-            console.log("Number: " + index);
-            console.log(path.basename(item) + " done");
-        }).catch(err => {
-            console.error(err);
+            // Jimp.read(item).then(lenna => {
+            //     lenna.quality(50)
+            //         .scale(0.1)
+            //         .write("/disk/assets/thumbnails/thumbnail-" + path.basename(item)); // save
+            //     console.log("Number: " + index);
+            //     console.log(path.basename(item) + " done");
+            // }).catch(err => {
+            //     console.error(err);
+            // });
+            
         });
     });
-});
-
