@@ -4,43 +4,43 @@ import * as Jimp from 'jimp';
 import * as fs from 'fs';
 import * as path from 'path';
 console.log("Image Thumbnail Program");
+let dataStringArray: string[] = [];
 
-function willGetRelativePathsFromFile(): Promise<string> {
-    return new Promise((resolve, reject) => {
-        fs.readFile('./data.txt', 'utf8', (err, dataString) => {
-            if (err) reject(err);
-            else resolve(dataString);
-        });
+let contents = fs.readFileSync('./thumbDataBeingAdded.txt', 'utf8');
+dataStringArray = contents.split('\n');
+
+dataStringArray.forEach((item, index) => {
+    // console.log("Index " + index);
+    // console.log(item);
+    // console.log(path.basename(item));
+    // console.log("/disk/assets/thumbnails/" + path.basename(item));
+    Jimp.read(item).then(image => {
+        let tempImageString = "/disk/assets/thumbnails/" + path.basename(item);
+        // console.log(tempImageString);
+        if (image.bitmap.width > 3000 || image.bitmap.height > 3000) {
+
+            // console.log(tempImageString);
+            image
+                .scale(.075)
+                .quality(50)
+                .write(tempImageString);
+            console.log("Number: " + index);
+            console.log(tempImageString + " done");
+        } else if ((image.bitmap.width > 1000 && image.bitmap.width <= 2999) || (image.bitmap.height > 1000 && image.bitmap.height <= 2999)) {
+            image
+                .scale(.25)
+                .quality(50)
+                .write(tempImageString);
+            console.log("Number: " + index);
+            console.log(tempImageString + " done");
+        } else {
+            image
+                .quality(50)
+                .write(tempImageString);
+            console.log("Number: " + index);
+            console.log(tempImageString + " done");
+        }
+    }).catch(err => {
+        console.error(err);
     });
-}
-
-export async function getRelativePathArray(): Promise<string[]> {
-    let tempString: string = '';
-    let dataStringArray: string[] = [];
-    tempString = await willGetRelativePathsFromFile();
-    try {
-        dataStringArray = tempString.toString().split('\n');
-    } catch (error) {
-        console.log('getRelativePathArray() ERROR');
-        console.log(error);
-    }
-    return dataStringArray;
-};
-
-getRelativePathArray()
-    .then(array => {
-        array.forEach((item, index) => {
-            console.log(item);
-
-            // Jimp.read(item).then(lenna => {
-            //     lenna.quality(50)
-            //         .scale(0.1)
-            //         .write("/disk/assets/thumbnails/thumbnail-" + path.basename(item)); // save
-            //     console.log("Number: " + index);
-            //     console.log(path.basename(item) + " done");
-            // }).catch(err => {
-            //     console.error(err);
-            // });
-            
-        });
-    });
+});

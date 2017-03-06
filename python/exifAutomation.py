@@ -87,7 +87,7 @@ except ConnectionError as e:    # This is the correct syntax
 countWithExif = 0
 countWithOutExif = 0
 countWithOutImageTuple = 0
-unsuccessfulUpdate = [];
+unsuccessfulUpdate = []
 
 for index, relativePath in enumerate(relativePaths):
     # print allImages.json()['response'][index]['url'].encode('ascii', 'ignore')
@@ -171,8 +171,8 @@ for index, relativePath in enumerate(relativePaths):
             print "====="
             print put_url_no_exif
 
-            put_url_no_exif_payload = "{\"exif\": {\"width\": " + str(imageTuple[0]) + ",\"length\": " + str(imageTuple[1]) + "\"}}"
-
+            put_url_no_exif_payload = "{\"exif.width\": \"" + str(imageTuple[0]) + ",\"exif.length\": \"" + str(imageTuple[1]) + "\"}}"
+            
             print "\npayload"
             print "====="
             print put_url_no_exif_payload
@@ -199,7 +199,7 @@ for index, relativePath in enumerate(relativePaths):
             print "====="
             print put_url_no_image_tuple
 
-            put_url_no_image_tuple_payload = "{\"exif\": {\"width\": " + str(3200) + ",\"length\": " + str(2400) + "\"}}"
+            put_url_no_image_tuple_payload = "{\"exif.width\": 3200,\"exif.length\":2400}"
 
             print "\npayload"
             print "====="
