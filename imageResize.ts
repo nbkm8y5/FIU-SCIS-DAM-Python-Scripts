@@ -13,9 +13,13 @@ dataStringArray.forEach((item, index) => {
     // console.log("Index " + index);
     // console.log(item);
     // console.log(path.basename(item));
-    // console.log("/disk/assets/thumbnails/" + path.basename(item));
+    // console.log("/disk/assets/thumbnails" + item.replace("disk/assets/", ""));
+    // console.log("/disk/assets/thumbnails" + path.dirname(item).replace("disk/assets/", ""));
+    if (!fs.existsSync("/disk/assets/thumbnails" + path.dirname(item).replace("disk/assets/", ""))) {
+        fs.mkdirSync("/disk/assets/thumbnails" + path.dirname(item).replace("disk/assets/", "")); //LOOPING
+    }
     Jimp.read(item).then(image => {
-        let tempImageString = "/disk/assets/thumbnails/" + path.basename(item);
+        let tempImageString = "/disk/assets/thumbnails" + item.replace("disk/assets/", "");
         // console.log(tempImageString);
         if (image.bitmap.width > 3000 || image.bitmap.height > 3000) {
 
