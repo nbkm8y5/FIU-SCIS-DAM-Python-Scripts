@@ -15,8 +15,8 @@ except ConnectionError as e:
    print e
    allImages = "No response from API GET /digitalassets"
 
-for index, y in enumerate(allImages.json()['response']):
-
+for index, y in enumerate(allImages.json()['response'][5260:9925]):
+    print index
     try:
         imageFile = requests.get(y['url'].encode('ascii', 'ignore'))
     except ConnectionError as e:
@@ -25,7 +25,7 @@ for index, y in enumerate(allImages.json()['response']):
 
     image = Image.open(BytesIO(imageFile.content))
 
-    put_url = "http://assets.cs.fiu.edu:3000/api/v1/digitalassets/" + allImages.json()['response'][index]['_id'].encode('ascii', 'ignore')
+    put_url = "http://assets.cs.fiu.edu:3000/api/v1/digitalassets/" + allImages.json()['response'][5260 + index]['_id'].encode('ascii', 'ignore')
   
     put_urlpayload = "{\"exif.width\": " + str(image.size[0]) + ",\"exif.length\": " + str(image.size[1]) + "}"
 
