@@ -1,0 +1,8 @@
+version: '2'
+services:
+  app:
+    image: thumbs:latest
+    volumes:
+      - /Users/nbkm8y5/Work/digital_asset_manager/script/python:/disk/python_programs
+    command:
+      python /disk/python_programs/imageResize.py
